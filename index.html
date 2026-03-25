@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LocalReport Italia</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #F7F3EE;
+    --espresso: #1C1410;
+    --terracotta: #C4622D;
+    --sage: #8A9E85;
+    --warm-gray: #9E9189;
+    --card: #FFFFFF;
+    --border: #E8E0D8;
+  }
+  body {
+    background: var(--cream);
+    color: var(--espresso);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    padding: 36px 18px;
+  }
+  header { max-width: 680px; margin: 0 auto 36px; }
+  .logo { font-family: 'Playfair Display', serif; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--terracotta); margin-bottom: 8px; }
+  h1 { font-family: 'Playfair Display', serif; font-size: clamp(24px, 5vw, 38px); font-weight: 400; line-height: 1.2; }
+  h1 em { font-style: italic; color: var(--terracotta); }
+  .subtitle { margin-top: 10px; font-size: 14px; color: var(--warm-gray); line-height: 1.6; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; max-width: 680px; margin: 0 auto 20px; }
+  .section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--terracotta); margin-bottom: 18px; }
+
+  .field { margin-bottom: 16px; }
+  label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 7px; }
+  .opt { font-size: 12px; color: var(--warm-gray); font-weight: 300; }
+  input, select { width: 100%; background: var(--cream); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 300; color: var(--espresso); outline: none; transition: border-color 0.2s; }
+  input:focus, select:focus { border-color: var(--terracotta); }
+
+  .btn { background: var(--espresso); color: var(--cream); border: none; border-radius: 11px; padding: 14px 24px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.2s; display: inline-flex; align-items: center; gap: 8px; width: 100%; justify-content: center; }
+  .btn:hover { background: var(--terracotta); }
+  .btn:disabled { background: var(--warm-gray); cursor: not-allowed; }
+  .btn-outline { background: none; border: 1px solid var(--border); color: var(--warm-gray); border-radius: 11px; padding: 10px 20px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s; margin-top: 10px; width: 100%; }
+  .btn-outline:hover { border-color: var(--espresso); color: var(--espresso); }
+  .btn-wa { background: #25D366; color: white; border: none; border-radius: 11px; padding: 14px 24px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; width: 100%; justify-content: center; text-decoration: none; margin-top: 10px; }
+  .btn-wa:hover { background: #1ea952; }
+
+  .spinner { width: 15px; height: 15px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .status-msg { font-size: 13px; color: var(--terracotta); margin-top: 14px; text-align: center; min-height: 20px; }
+
+  .rest-card { border: 1.5px solid var(--border); border-radius: 12px; padding: 16px 18px; margin-bottom: 10px; cursor: pointer; transition: all 0.18s; }
+  .rest-card:hover { border-color: var(--terracotta); background: #FEF8F4; }
+  .rest-card.selected { border-color: var(--terracotta); background: #FEF0EA; }
+  .rest-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .rest-name { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .rest-meta { font-size: 12px; color: var(--warm-gray); margin-bottom: 4px; }
+  .rest-phone { font-size: 13px; color: var(--sage); font-weight: 500; margin-top: 6px; }
+  .rest-reviews { font-size: 12px; color: var(--espresso); font-style: italic; opacity: 0.65; line-height: 1.5; margin-top: 6px; }
+  .badge { background: var(--terracotta); color: white; border-radius: 8px; padding: 4px 10px; font-size: 14px; font-weight: 500; font-family: 'Playfair Display', serif; flex-shrink: 0; }
+  .badge.ok { background: var(--warm-gray); }
+  .no-phone { font-size: 12px; color: var(--warm-gray); font-style: italic; margin-top: 4px; }
+
+  #results-section { display: none; }
+  #message-section { display: none; }
+
+  .msg-wrap { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .wa-bar { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .wa-left { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
+  .wa-dot { width: 9px; height: 9px; background: #25D366; border-radius: 50%; }
+  .copy-btn { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 5px 12px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; color: var(--warm-gray); cursor: pointer; transition: all 0.15s; }
+  .copy-btn:hover { border-color: var(--terracotta); color: var(--terracotta); }
+  .copy-btn.copied { border-color: var(--sage); color: var(--sage); }
+  #output-text { padding: 22px; font-size: 15px; line-height: 1.8; white-space: pre-wrap; }
+
+  .shimmer-line { height: 13px; background: linear-gradient(90deg, var(--border) 25%, #f0e8e0 50%, var(--border) 75%); background-size: 200% 100%; border-radius: 6px; animation: sh 1.4s infinite; margin-bottom: 10px; }
+  @keyframes sh { to { background-position: -200% 0; } }
+
+  .error { color: var(--terracotta); font-size: 13px; padding: 12px 14px; background: #FEF0EA; border-radius: 10px; margin-top: 12px; display: none; }
+
+  .rating-filter { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .rating-opt { background: var(--cream); border: 1.5px solid var(--border); border-radius: 20px; padding: 6px 14px; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+  .rating-opt.active { background: var(--terracotta); border-color: var(--terracotta); color: white; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">LocalReport Italia</div>
+  <h1>Trova e contatta<br><em>ristoranti da aiutare</em></h1>
+  <p class="subtitle">Ristoranti reali da Google Maps · Numeri di telefono · Messaggio WhatsApp personalizzato</p>
+</header>
+
+<!-- SEARCH -->
+<div class="card" id="search-card">
+  <div class="section-label">Cerca ristoranti reali</div>
+
+  <div class="field">
+    <label>Città</label>
+    <input type="text" id="city" placeholder="es. Milano" />
+  </div>
+  <div class="field">
+    <label>Zona o quartiere <span class="opt">(opzionale)</span></label>
+    <input type="text" id="zone" placeholder="es. Navigli, Pigneto, Brera..." />
+  </div>
+  <div class="field">
+    <label>Tipo di cucina <span class="opt">(opzionale)</span></label>
+    <input type="text" id="cuisine" placeholder="es. pizza, pesce, sushi, trattoria..." />
+  </div>
+
+  <div class="field">
+    <label>Mostra ristoranti con rating massimo</label>
+    <div class="rating-filter">
+      <div class="rating-opt" data-val="2.5" onclick="setRating(this)">≤ 2.5 ★</div>
+      <div class="rating-opt active" data-val="3.0" onclick="setRating(this)">≤ 3.0 ★</div>
+      <div class="rating-opt" data-val="3.5" onclick="setRating(this)">≤ 3.5 ★</div>
+      <div class="rating-opt" data-val="4.0" onclick="setRating(this)">≤ 4.0 ★</div>
+      <div class="rating-opt" data-val="5.0" onclick="setRating(this)">Tutti</div>
+    </div>
+  </div>
+
+  <button class="btn" id="search-btn" onclick="doSearch()">
+    <span class="spinner" id="s-spin" style="display:none"></span>
+    <span id="s-label">Cerca ristoranti</span>
+  </button>
+  <div class="status-msg" id="status-msg"></div>
+  <div class="error" id="search-err"></div>
+</div>
+
+<!-- RESULTS -->
+<div class="card" id="results-section">
+  <div class="section-label" id="results-title">Ristoranti trovati</div>
+  <div id="rest-list"></div>
+  <button class="btn" id="msg-btn" onclick="doMessage()" style="display:none; margin-top:8px" disabled>
+    <span class="spinner" id="m-spin" style="display:none"></span>
+    <span id="m-label">Genera messaggio WhatsApp →</span>
+  </button>
+  <button class="btn-outline" onclick="resetAll()">← Nuova ricerca</button>
+  <div class="error" id="msg-err"></div>
+</div>
+
+<!-- MESSAGE -->
+<div class="card" id="message-section">
+  <div class="section-label" id="msg-for"></div>
+  <div class="msg-wrap">
+    <div class="wa-bar">
+      <div class="wa-left"><div class="wa-dot"></div> Messaggio WhatsApp</div>
+      <button class="copy-btn" id="copy-btn" onclick="doCopy()">Copia</button>
+    </div>
+    <div id="output-text"></div>
+  </div>
+  <a id="wa-link" class="btn-wa" href="#" target="_blank" style="display:none">
+    📲 Apri in WhatsApp
+  </a>
+  <button class="btn" onclick="doMessage()" style="margin-top:10px">Rigenera variante</button>
+  <button class="btn-outline" onclick="backToResults()">← Scegli altro ristorante</button>
+</div>
+
+<script>
+const GOOGLE_KEY = 'AIzaSyAVIgDDw0rwvrOB_LcEEwxmTajK1DbDskE';
+let selected = null;
+let maxRating = 3.0;
+let allResults = [];
+
+function setRating(el) {
+  document.querySelectorAll('.rating-opt').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  maxRating = parseFloat(el.dataset.val);
+}
+
+async function doSearch() {
+  const city = document.getElementById('city').value.trim();
+  if (!city) { showErr('search-err', 'Inserisci almeno la città.'); return; }
+  const zone = document.getElementById('zone').value.trim();
+  const cuisine = document.getElementById('cuisine').value.trim();
+
+  hideErr('search-err');
+  setBusy('search-btn', 's-spin', 's-label', true, 'Ricerca in corso...');
+  setStatus('Sto cercando ristoranti reali a ' + city + '…');
+
+  // Build search query
+  let query = cuisine ? cuisine + ' ristorante ' : 'ristorante ';
+  query += zone ? zone + ' ' + city : city;
+
+  try {
+    // Step 1: Text search via Places API
+    const searchRes = await fetch(`https://places.googleapis.com/v1/places:searchText`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': GOOGLE_KEY,
+        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.types,places.internationalPhoneNumber,places.nationalPhoneNumber'
+      },
+      body: JSON.stringify({
+        textQuery: query,
+        languageCode: 'it',
+        maxResultCount: 20
+      })
+    });
+
+    const searchData = await searchRes.json();
+    if (!searchRes.ok) throw new Error(searchData.error?.message || 'Errore Places API');
+
+    const places = searchData.places || [];
+
+    // Filter by rating
+    allResults = places
+      .filter(p => p.rating && p.rating <= maxRating)
+      .sort((a, b) => a.rating - b.rating)
+      .slice(0, 8);
+
+    if (allResults.length === 0) {
+      // Try without rating filter and show what's available
+      const anyRating = places.filter(p => p.rating).sort((a, b) => a.rating - b.rating).slice(0, 8);
+      if (anyRating.length === 0) {
+        showErr('search-err', 'Nessun ristorante trovato. Prova con un\'altra città o tipo di cucina.');
+        setBusy('search-btn', 's-spin', 's-label', false, 'Cerca ristoranti');
+        setStatus('');
+        return;
+      }
+      allResults = anyRating;
+      setStatus('Nessun ristorante con quel rating — mostro i peggiori disponibili.');
+    } else {
+      setStatus('');
+    }
+
+    renderResults(city, zone, cuisine);
+  } catch(e) {
+    showErr('search-err', 'Errore nella ricerca: ' + e.message);
+    console.error(e);
+    setStatus('');
+  }
+
+  setBusy('search-btn', 's-spin', 's-label', false, 'Cerca ristoranti');
+}
+
+function renderResults(city, zone, cuisine) {
+  let title = 'Ristoranti a ' + city;
+  if (zone) title += ' · ' + zone;
+  if (cuisine) title += ' · ' + cuisine;
+  document.getElementById('results-title').textContent = title + ' (' + allResults.length + ')';
+
+  const el = document.getElementById('rest-list');
+  el.innerHTML = '';
+  selected = null;
+
+  allResults.forEach((r, i) => {
+    const name = r.displayName?.text || 'Ristorante';
+    const address = r.formattedAddress || '';
+    const rating = r.rating || '—';
+    const count = r.userRatingCount || 0;
+    const phone = r.nationalPhoneNumber || r.internationalPhoneNumber || null;
+    const low = rating <= 3.5;
+
+    const div = document.createElement('div');
+    div.className = 'rest-card';
+    div.innerHTML = `
+      <div class="rest-top">
+        <div style="flex:1">
+          <div class="rest-name">${name}</div>
+          <div class="rest-meta">${address}</div>
+          <div class="rest-meta">${count} recensioni su Google</div>
+          ${phone
+            ? `<div class="rest-phone">📞 ${phone}</div>`
+            : `<div class="no-phone">Numero non disponibile su Google Maps</div>`}
+        </div>
+        <div class="badge ${low ? '' : 'ok'}">${typeof rating === 'number' ? rating.toFixed(1) : rating} ★</div>
+      </div>`;
+    div.onclick = () => {
+      document.querySelectorAll('.rest-card').forEach(c => c.classList.remove('selected'));
+      div.classList.add('selected');
+      selected = { name, address, rating, count, phone, id: r.id };
+      document.getElementById('msg-btn').disabled = false;
+    };
+    el.appendChild(div);
+  });
+
+  document.getElementById('results-section').style.display = 'block';
+  document.getElementById('msg-btn').style.display = 'flex';
+  document.getElementById('message-section').style.display = 'none';
+  document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function doMessage() {
+  if (!selected) { showErr('msg-err', 'Seleziona un ristorante.'); return; }
+  hideErr('msg-err');
+  setBusy('msg-btn', 'm-spin', 'm-label', true, 'Generazione...');
+
+  const r = selected;
+  document.getElementById('msg-for').textContent = r.name + (r.rating ? ' · ' + (typeof r.rating === 'number' ? r.rating.toFixed(1) : r.rating) + ' ★' : '');
+  document.getElementById('message-section').style.display = 'block';
+  document.getElementById('output-text').innerHTML = shimmer();
+  document.getElementById('wa-link').style.display = 'none';
+  document.getElementById('message-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  const prompt = `Scrivi un messaggio WhatsApp in italiano per contattare il proprietario di "${r.name}" (${r.address}${r.rating ? ', ' + r.rating + ' stelle su Google' : ''}${r.count ? ', ' + r.count + ' recensioni' : ''}).
+
+Il messaggio deve:
+- Aprirsi con saluto caldo e naturale
+- Dimostrare di aver notato la loro situazione su Google (rating basso, molte recensioni negative)
+- Mostrare empatia, non condiscendenza
+- Presentare brevemente LocalReport Italia (monitoraggio e gestione reputazione online per ristoranti)
+- Chiudere con domanda aperta, non con una vendita diretta
+- Tono: consulenziale, umano, diretto — come un professionista che ha notato qualcosa di importante
+- 5–8 righe, testo fluido, niente elenchi puntati
+- Firma: "Fra – LocalReport Italia"
+
+Solo il messaggio, nessun commento aggiuntivo.`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 500,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Errore');
+    const text = data.content?.find(b => b.type === 'text')?.text || '';
+    document.getElementById('output-text').textContent = text;
+    document.getElementById('copy-btn').textContent = 'Copia';
+    document.getElementById('copy-btn').classList.remove('copied');
+
+    // WhatsApp link
+    if (r.phone) {
+      const cleaned = r.phone.replace(/\D/g, '');
+      const waNumber = cleaned.startsWith('0') ? '39' + cleaned.slice(1) : cleaned;
+      const waText = encodeURIComponent(text);
+      const waLink = document.getElementById('wa-link');
+      waLink.href = `https://wa.me/${waNumber}?text=${waText}`;
+      waLink.style.display = 'flex';
+    }
+  } catch(e) {
+    document.getElementById('output-text').textContent = '';
+    showErr('msg-err', 'Errore nella generazione. Riprova.');
+    console.error(e);
+  }
+
+  setBusy('msg-btn', 'm-spin', 'm-label', false, 'Genera messaggio WhatsApp →');
+}
+
+function doCopy() {
+  const t = document.getElementById('output-text').textContent;
+  navigator.clipboard.writeText(t).then(() => {
+    const b = document.getElementById('copy-btn');
+    b.textContent = 'Copiato ✓'; b.classList.add('copied');
+    setTimeout(() => { b.textContent = 'Copia'; b.classList.remove('copied'); }, 2500);
+  });
+}
+
+function backToResults() {
+  document.getElementById('message-section').style.display = 'none';
+  document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function resetAll() {
+  selected = null; allResults = [];
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('message-section').style.display = 'none';
+  document.getElementById('rest-list').innerHTML = '';
+  document.getElementById('msg-btn').style.display = 'none';
+  document.getElementById('msg-btn').disabled = true;
+  setStatus('');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function setBusy(btnId, spinId, labelId, on, label) {
+  document.getElementById(btnId).disabled = on;
+  document.getElementById(spinId).style.display = on ? 'block' : 'none';
+  document.getElementById(labelId).textContent = label;
+}
+
+function setStatus(msg) { document.getElementById('status-msg').textContent = msg; }
+function showErr(id, msg) { const e = document.getElementById(id); e.textContent = msg; e.style.display = 'block'; }
+function hideErr(id) { document.getElementById(id).style.display = 'none'; }
+function shimmer() {
+  return `<div style="padding:16px 0">${[92,75,85,60,78].map(w =>
+    `<div class="shimmer-line" style="width:${w}%"></div>`).join('')}</div>`;
+}
+</script>
+</body>
+</html>
